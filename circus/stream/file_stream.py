@@ -45,7 +45,15 @@ class _FileStreamBase(object):
                 time = self.fromtimestamp(data['timestamp'])
             else:
                 time = self.now()
-            time = time.strftime(self._time_format)
+            ## hack by zhanjianbo
+            if self._time_format.find("%E") != -1:
+                time_format = self._time_format.replace("%E", {})
+                time0 = time.strftime(time_format)
+                ms = time.strftime("%f")[0:3]
+                time = time0.replace("{}", ms)
+            else:
+                time = time.strftime(self._time_format)
+            ## hack done
             prefix = '{time} [{pid}] | '.format(time=time, pid=data['pid'])
             file_data = prefix + file_data.rstrip('\n')
             file_data = file_data.replace('\n', '\n' + prefix)
@@ -252,12 +260,16 @@ class TimedRotatingFileStream(FileStream):
             self._ext_match = r"^\d{4}\d{2}\d{2}\d{2}\d{2}$"
         elif self._when == "H":
             self._interval = 60 * 60
-            self._suffix = "%Y%m%d%H"
-            self._ext_match = r"^\d{4}\d{2}\d{2}\d{2}$"
-        elif self._when in ("D", "MIDNIGHT"):
+            #self._suffix = "%Y%m%d%H"
+            #self._ext_match = r"^\d{4}\d{2}\d{2}\d{2}$"
+            self._suffix = "%Y%m%d%H%M"
+            self._ext_match = r"^\d{4}\d{2}\d{2}\d{2}\d{2}$"
+        elif self._when in ("D", "MIDNIGHT", "midnight"):
             self._interval = 60 * 60 * 24
-            self._suffix = "%Y%m%d"
-            self._ext_match = r"^\d{4}\d{2}\d{2}$"
+            #self._suffix = "%Y%m%d"
+            #self._ext_match = r"^\d{4}\d{2}\d{2}$"
+            self._suffix = "%Y%m%d%H%M"
+            self._ext_match = r"^\d{4}\d{2}\d{2}\d{2}\d{2}$"
         elif self._when.startswith("W"):
             self._interval = 60 * 60 * 24 * 7
             if len(self._when) != 2:
@@ -325,7 +337,7 @@ for weekly rollover: %s" % self._when)
     def _compute_rollover(self, current_time):
         result = current_time + self._interval
 
-        if self._when == "MIDNIGHT" or self._when.startswith("W"):
+        if self._when == "MIDNIGHT" or self._when == "midnight" or self._when == "D" or self._when.startswith("W"):
             if self._utc:
                 t = time_.gmtime(current_time)
             else:
