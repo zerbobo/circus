@@ -47,7 +47,7 @@ class _FileStreamBase(object):
                 time = self.now()
             ## hack by zhanjianbo
             if self._time_format.find("%E") != -1:
-                time_format = self._time_format.replace("%E", {})
+                time_format = self._time_format.replace("%E", "{}")
                 time0 = time.strftime(time_format)
                 ms = time.strftime("%f")[0:3]
                 time = time0.replace("{}", ms)
@@ -252,24 +252,24 @@ class TimedRotatingFileStream(FileStream):
 
         if self._when == "S":
             self._interval = 1
-            self._suffix = "%Y%m%d%H%M%S"
-            self._ext_match = r"^\d{4}\d{2}\d{2}\d{2}\d{2}\d{2}$"
+            self._suffix = "%Y%m%d.%H%M%S"
+            self._ext_match = r"^\d{4}\d{2}\d{2}\.\d{2}\d{2}\d{2}$"
         elif self._when == "M":
             self._interval = 60
-            self._suffix = "%Y%m%d%H%M"
-            self._ext_match = r"^\d{4}\d{2}\d{2}\d{2}\d{2}$"
+            self._suffix = "%Y%m%d.%H%M"
+            self._ext_match = r"^\d{4}\d{2}\d{2}\.\d{2}\d{2}$"
         elif self._when == "H":
             self._interval = 60 * 60
             #self._suffix = "%Y%m%d%H"
             #self._ext_match = r"^\d{4}\d{2}\d{2}\d{2}$"
-            self._suffix = "%Y%m%d%H%M"
-            self._ext_match = r"^\d{4}\d{2}\d{2}\d{2}\d{2}$"
+            self._suffix = "%Y%m%d.%H%M"
+            self._ext_match = r"^\d{4}\d{2}\d{2}\.\d{2}\d{2}$"
         elif self._when in ("D", "MIDNIGHT", "midnight"):
             self._interval = 60 * 60 * 24
             #self._suffix = "%Y%m%d"
             #self._ext_match = r"^\d{4}\d{2}\d{2}$"
-            self._suffix = "%Y%m%d%H%M"
-            self._ext_match = r"^\d{4}\d{2}\d{2}\d{2}\d{2}$"
+            self._suffix = "%Y%m%d.%H%M"
+            self._ext_match = r"^\d{4}\d{2}\d{2}\.\d{2}\d{2}$"
         elif self._when.startswith("W"):
             self._interval = 60 * 60 * 24 * 7
             if len(self._when) != 2:
